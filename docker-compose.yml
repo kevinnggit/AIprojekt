@@ -1,0 +1,45 @@
+networks:
+  app-network:
+
+services:
+  vue-frontend:
+    build:
+      context: ./vue-frontend
+      dockerfile: Dockerfile
+    container_name: nspace-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - java-backend
+      - python-backend
+    networks:
+      - app-network
+    environment:
+      - VITE_JAVA_API_URL=http://java-backend:8080
+      - VITE_PYTHON_API_URL=http://python-backend:8000
+
+  java-backend:
+    build:
+      context: ./java-backend
+      dockerfile: Dockerfile
+    container_name: nspace-java
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SERVER_PORT=8080
+    networks:
+      - app-network
+
+  python-backend:
+    build:
+      context: ./python-backend
+      dockerfile: Dockerfile
+    container_name: nspace-python
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    networks:
+      - app-network
