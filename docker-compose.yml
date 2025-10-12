@@ -1,22 +1,26 @@
-networks:
-  app-network:
+
 
 services:
   vue-frontend:
     build:
       context: ./vue-frontend
       dockerfile: Dockerfile
+      args:
+        VITE_JAVA_API_URL: ${VITE_JAVA_API_URL}
+        VITE_PYTHON_API_URL: ${VITE_PYTHON_API_URL}
+    #container_name: nspace-frontend
     container_name: nspace-frontend
     ports:
-      - "3000:80"
+      - "${FRONTEND_PORT}:80"
+      #- "3000:80"
     depends_on:
       - java-backend
       - python-backend
     networks:
       - app-network
-    environment:
-      - VITE_JAVA_API_URL=http://java-backend:8080
-      - VITE_PYTHON_API_URL=http://python-backend:8000
+    # environment:
+     # - VITE_JAVA_API_URL=http://java-backend:8080
+     # - VITE_PYTHON_API_URL=http://python-backend:8000
 
   java-backend:
     build:
@@ -24,10 +28,13 @@ services:
       dockerfile: Dockerfile
     container_name: nspace-java
     ports:
-      - "8080:8080"
+      - "${JAVA_PORT}:8080"
+      #- "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SERVER_PORT=8080
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      #- SPRING_PROFILES_ACTIVE=docker
+      SERVER_PORT: ${JAVA_PORT}
+      #- SERVER_PORT=8080
     networks:
       - app-network
 
@@ -37,9 +44,17 @@ services:
       dockerfile: Dockerfile
     container_name: nspace-python
     ports:
-      - "8000:8000"
+      - "${PYTHON_PORT}:8000"
+      #- "8000:8000"
     environment:
-      - PYTHONPATH=/app
-      - PYTHONUNBUFFERED=1
+      PYTHONPATH: /app
+      PYTHONUNBUFFERED: "1"
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      SYSTEM_PROMPT: ${SYSTEM_PROMPT}
     networks:
       - app-network
+
+networks:
+  app-network:
