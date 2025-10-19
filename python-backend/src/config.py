@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-# Lädt .env aus dem Projektroot (nur wenn lokal)
+# Lädt .env aus dem Projektroot
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), '..', '.env'))
 
 MODEL_NAME = os.getenv("MODEL_NAME", "mock-model")

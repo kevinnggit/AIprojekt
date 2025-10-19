@@ -1,22 +1,22 @@
-# Python FastAPI Backend Dockerfile
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# Installiere System-Abhängigkeiten
 RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
+# Kopiere requirements und installiere Python-Abhängigkeiten
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY . .
+# Kopiere den gesamten src Ordner
+COPY src/ ./src/
 
-# Expose port
-EXPOSE 8000
+# Setze PYTHONPATH
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
 
-# Start FastAPI with uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Starte die Anwendung
+CMD ["python", "-m", "src.main"]

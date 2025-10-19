@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers.ai import router as ai_router
-from app.config import ALLOWED_ORIGINS
+from src.openai_client import router as ai_router
+from src.config import ALLOWED_ORIGINS
 
 app = FastAPI(
     title="NSPACE Python API",

@@ -1,8 +1,10 @@
 from time import perf_counter
 from typing import Any, Dict
-
+from fastapi import APIRouter, HTTPException
 from openai import OpenAI
-from ..config import OPENAI_API_KEY, OPENAI_MODEL, SYSTEM_PROMPT
+from .config import OPENAI_API_KEY, OPENAI_MODEL, SYSTEM_PROMPT
+
+router = APIRouter(prefix="/api/ki", tags=["KI"])
 
 _client: OpenAI | None = None
 
@@ -36,3 +38,18 @@ def infer_text(text: str) -> Dict[str, Any]:
         },
         "latency_ms": latency_ms
     }
+
+@router.get("/info")
+def info():
+    try:
+        get_client()
+        return {"model": "openai", "provider": "openai", "ready": True}
+    except Exception:
+        return {"model": "openai", "provider": "openai", "ready": False}
+
+@router.post("/infer")
+def infer(req: dict):
+    try:
+        return infer_text(req["text"])
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
