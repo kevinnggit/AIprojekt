@@ -13,6 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Kopiere den gesamten src Ordner
 COPY src/ ./src/
+COPY tests/ ./tests/
 
 # Setze PYTHONPATH
 ENV PYTHONPATH=/app

@@ -11,7 +11,7 @@ ENV VITE_JAVA_API_URL=${VITE_JAVA_API_URL}
 ENV VITE_PYTHON_API_URL=${VITE_PYTHON_API_URL}
 
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 COPY . .
 RUN npm run build
 

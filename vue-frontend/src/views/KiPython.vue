@@ -1,11 +1,11 @@
 <template>
   <section>
     <h2>KI Python Projekte</h2>
-    <p>Hier werden KI und Python-bezogene Projekte angezeigt.</p>
+    <p>Hier werden KI-Funktionen über das Python Backend (Port 8000) gesteuert.</p>
     
-    <!-- KI Inferenz Interface -->
+    <!-- 1. KI Inferenz -->
     <div class="ki-interface">
-      <h3>KI Inferenz Test</h3>
+      <h3>1. KI Text-Analyse (Inferenz)</h3>
       <div class="input-group">
         <textarea 
           v-model="inputText" 
@@ -14,77 +14,104 @@
         ></textarea>
         <button 
           @click="runInference" 
-          :disabled="loading || !inputText.trim()"
+          :disabled="loadingInfer || !inputText.trim()"
           class="infer-btn"
         >
-          {{ loading ? 'Analysiere...' : 'KI-Analyse starten' }}
+          {{ loadingInfer ? 'Analysiere...' : 'Text analysieren' }}
         </button>
       </div>
       
-      <!-- Ergebnis -->
-      <div v-if="result" class="result">
-        <h4>KI-Antwort:</h4>
-        <div class="response">{{ result.result.content }}</div>
+      <!-- Ergebnis Inferenz -->
+      <div v-if="resultInfer" class="result">
+        <h4>Antwort:</h4>
+        <div class="response">{{ resultInfer.result.content }}</div>
         <div class="meta">
-          <small>Modell: {{ result.model }} | Latenz: {{ result.latency_ms }}ms</small>
+          <small>Modell: {{ resultInfer.model }} | Latenz: {{ resultInfer.latency_ms }}ms</small>
         </div>
       </div>
-      
-      <!-- Fehler -->
-      <div v-if="error" class="error">
-        <h4>Fehler:</h4>
-        <p>{{ error }}</p>
+    </div>
+
+    <!-- 2. Projekt-Ideen Generator -->
+    <div class="ki-interface">
+      <h3>2. Projekt-Ideen Generator</h3>
+      <div class="ideas-form">
+        <input v-model="ideaTopic" placeholder="Thema (z.B. Weltraum)" class="topic-input" />
+        <select v-model="ideaCount" class="count-select">
+          <option :value="3">3 Ideen</option>
+          <option :value="5">5 Ideen</option>
+        </select>
+        <button 
+          @click="generateIdeas" 
+          :disabled="loadingIdeas || !ideaTopic.trim()"
+          class="infer-btn secondary"
+        >
+          {{ loadingIdeas ? 'Generiere...' : 'Ideen finden' }}
+        </button>
+      </div>
+
+      <!-- Ergebnis Ideen -->
+      <div v-if="resultIdeas" class="result ideas-result">
+        <h4>Vorschläge für "{{ resultIdeas.topic }}":</h4>
+        <ul>
+          <li v-for="(idea, idx) in resultIdeas.ideas" :key="idx">{{ idea }}</li>
+        </ul>
+        <div class="meta">
+          <small>Modell: {{ resultIdeas.model_used }}</small>
+        </div>
       </div>
     </div>
+
+    <!-- Globaler Fehler -->
+    <div v-if="error" class="error">
+      <h4>Fehler:</h4>
+      <p>{{ error }}</p>
+      <button @click="error = null" class="close-err">Schließen</button>
+    </div>
+
   </section>
 </template>
 
-<script>
-import { ref } from 'vue'
+<script setup>
+import { ref } from 'vue';
+import { api } from '../services/api';
 
-export default {
-  name: 'KiPythonView',
-  setup() {
-    const inputText = ref('')
-    const loading = ref(false)
-    const result = ref(null)
-    const error = ref(null)
-    
-    const API_BASE = 'http://localhost:8000'
-    
-    const runInference = async () => {
-      loading.value = true
-      error.value = null
-      result.value = null
-      
-      try {
-        const response = await fetch(`${API_BASE}/api/ki/infer`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ text: inputText.value })
-        })
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${await response.text()}`)
-        }
-        
-        result.value = await response.json()
-      } catch (err) {
-        error.value = err.message
-      } finally {
-        loading.value = false
-      }
-    }
-    
-    return {
-      inputText,
-      loading,
-      result,
-      error,
-      runInference
-    }
+// State Inferenz
+const inputText = ref('');
+const loadingInfer = ref(false);
+const resultInfer = ref(null);
+
+// State Ideen
+const ideaTopic = ref('');
+const ideaCount = ref(3);
+const loadingIdeas = ref(false);
+const resultIdeas = ref(null);
+
+// Global Error
+const error = ref(null);
+
+const runInference = async () => {
+  loadingInfer.value = true;
+  error.value = null;
+  resultInfer.value = null;
+  try {
+    resultInfer.value = await api.ai.infer(inputText.value);
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    loadingInfer.value = false;
+  }
+};
+
+const generateIdeas = async () => {
+  loadingIdeas.value = true;
+  error.value = null;
+  resultIdeas.value = null;
+  try {
+    resultIdeas.value = await api.ai.generateIdeas(ideaTopic.value, ideaCount.value);
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    loadingIdeas.value = false;
   }
 };
 </script>
@@ -96,92 +123,122 @@ section {
   margin: 0 auto;
 }
 
-h2 {
-  color: #333;
-  margin-bottom: 20px;
-}
+h2 { color: #333; margin-bottom: 20px; }
 
 .ki-interface {
-  background: #f9f9f9;
-  padding: 20px;
+  background: #fdfdfd;
+  padding: 25px;
   border-radius: 8px;
-  margin-top: 20px;
+  margin-top: 30px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
 }
 
 .ki-interface h3 {
-  color: #333;
+  color: #2c3e50;
   margin-bottom: 15px;
+  border-bottom: 2px solid #007bff;
+  display: inline-block;
+  padding-bottom: 5px;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 15px;
 }
 
 textarea {
   width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Ideen Formular Styles */
+.ideas-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.topic-input {
+  flex: 1;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-family: inherit;
-  resize: vertical;
+}
+
+.count-select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
 }
 
 .infer-btn {
-  padding: 10px 20px;
+  padding: 10px 25px;
   background: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
+  transition: background 0.2s;
 }
 
-.infer-btn:hover:not(:disabled) {
-  background: #0056b3;
-}
+.infer-btn.secondary { background: #6c757d; }
+.infer-btn:hover:not(:disabled) { filter: brightness(0.9); }
+.infer-btn:disabled { background: #ccc; cursor: not-allowed; }
 
-.infer-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
+/* Result Styles */
 .result {
-  background: #e8f5e8;
-  padding: 15px;
-  border-radius: 4px;
-  margin-top: 15px;
+  background: #f0f7ff;
+  padding: 20px;
+  border-radius: 6px;
+  margin-top: 20px;
+  border: 1px solid #cce5ff;
 }
 
-.result h4 {
-  margin: 0 0 10px 0;
-  color: #2d5a2d;
-}
+.ideas-result { background: #fff8e1; border-color: #ffeeba; }
+
+.result h4 { margin: 0 0 10px 0; color: #004085; }
+.ideas-result h4 { color: #856404; }
 
 .response {
   background: white;
-  padding: 10px;
+  padding: 15px;
   border-radius: 4px;
-  border-left: 3px solid #28a745;
+  border-left: 4px solid #007bff;
   margin-bottom: 10px;
+  line-height: 1.5;
 }
 
-.meta {
-  color: #666;
-  font-size: 0.9em;
-}
+ul { padding-left: 20px; margin: 10px 0; }
+li { margin-bottom: 5px; color: #333; }
+
+.meta { color: #888; font-size: 0.85em; text-align: right; }
 
 .error {
   background: #f8d7da;
   color: #721c24;
   padding: 15px;
   border-radius: 4px;
-  margin-top: 15px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.error h4 {
-  margin: 0 0 10px 0;
+.close-err {
+  background: none;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 </style>

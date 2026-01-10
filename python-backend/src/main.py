@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.openai_client import router as ai_router
+from src.routers.ai_router import router as ai_router
 from src.config import ALLOWED_ORIGINS
 
 app = FastAPI(
@@ -9,6 +9,9 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# CORS (Cross-Origin Resource Sharing)
+# Wichtig: Erlaubt dem Frontend (localhost:3000) Anfragen an dieses Backend (localhost:8000).
+# Ohne das würde der Browser die Verbindung blockieren (Sicherheitsfeature).
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,

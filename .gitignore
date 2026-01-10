@@ -32,3 +32,6 @@ coverage
 .env
 **/.env
 !vue-frontend/.env.example
+prompts/
+tmp/
+project_learning_hub/

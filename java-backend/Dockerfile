@@ -1,5 +1,5 @@
 # Java Backend Dockerfile
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jdk
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ COPY src ./src
 
 # Install Maven and build
 RUN apt-get update && apt-get install -y maven && \
-    mvn clean package -DskipTests && \
+    mvn -B clean package && \
     apt-get remove -y maven && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
