@@ -14,6 +14,7 @@ const routes = [
   { path: '/java', name: 'java', component: Java },
   { path: '/python', name: 'python', component: Python },
   { path: '/login', name: 'login', component: Login },
+  { path: '/portfolio', name: 'portfolio', component: () => import('@/views/Portfolio.vue') },
   {
     path: '/admin',
     name: 'admin',

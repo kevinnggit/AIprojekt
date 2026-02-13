@@ -23,6 +23,9 @@ class AppointmentServiceTest {
     @Mock
     private AppointmentRepository repository;
 
+    @Mock
+    private ConfigService configService;
+
     @InjectMocks
     private AppointmentService service;
 
@@ -43,13 +46,27 @@ class AppointmentServiceTest {
         verify(repository, times(1)).findAll();
     }
 
+    private LocalDateTime getValidFutureDate() {
+        LocalDateTime now = LocalDateTime.now();
+        // Skip ahead to ensure future
+        LocalDateTime future = now.plusDays(7);
+        // Find next Monday
+        while (future.getDayOfWeek() != java.time.DayOfWeek.MONDAY) {
+            future = future.plusDays(1);
+        }
+        return future.withHour(10).withMinute(0).withSecond(0).withNano(0);
+    }
+
     @Test
     void createAppointment_ShouldSaveAndReturnResponse() {
         // Arrange
-        LocalDateTime start = LocalDateTime.of(2023, 10, 10, 10, 0);
+        LocalDateTime start = getValidFutureDate();
         AppointmentRequest request = new AppointmentRequest("Max", "test@mail.com", "Talk", start);
 
         Appointment savedAppt = new Appointment("Max", "test@mail.com", "Talk", start, start.plusHours(1));
+
+        when(configService.getInt(anyString(), anyInt())).thenReturn(3);
+        when(repository.existsByStartTime(start)).thenReturn(false);
         when(repository.save(any(Appointment.class))).thenReturn(savedAppt);
 
         // Act

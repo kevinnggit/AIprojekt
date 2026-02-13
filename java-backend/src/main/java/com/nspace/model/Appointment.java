@@ -26,8 +26,9 @@ public class Appointment {
     @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status; // z.B. "CONFIRMED", "PENDING", "CANCELLED"
+    private AppointmentStatus status; // "PENDING", "CONFIRMED", "CANCELLED"
 
     public Appointment() {
     }
@@ -38,7 +39,7 @@ public class Appointment {
         this.topic = topic;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.status = "PENDING";
+        this.status = AppointmentStatus.PENDING;
     }
 
     // Getters and Setters
@@ -90,11 +91,11 @@ public class Appointment {
         this.endTime = endTime;
     }
 
-    public String getStatus() {
+    public AppointmentStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(AppointmentStatus status) {
         this.status = status;
     }
 }

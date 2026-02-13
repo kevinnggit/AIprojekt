@@ -3,6 +3,16 @@
     <h2>KI Python Projekte</h2>
     <p>Hier werden KI-Funktionen über das Python Backend (Port 8000) gesteuert.</p>
     
+    <!-- Provider Selector -->
+    <div class="provider-select">
+        <label>🧠 KI-Gehirn wählen:</label>
+        <select v-model="provider">
+            <option value="openai">OpenAI (GPT-3.5)</option>
+            <option value="deepseek">DeepSeek (V3)</option>
+            <option value="ollama">Ollama (Llama 2 Local)</option>
+        </select>
+    </div>
+
     <!-- 1. KI Inferenz -->
     <div class="ki-interface">
       <h3>1. KI Text-Analyse (Inferenz)</h3>
@@ -26,7 +36,7 @@
         <h4>Antwort:</h4>
         <div class="response">{{ resultInfer.result.content }}</div>
         <div class="meta">
-          <small>Modell: {{ resultInfer.model }} | Latenz: {{ resultInfer.latency_ms }}ms</small>
+          <small>Modell: {{ resultInfer.model }} | Provider: {{ resultInfer.provider }} | Latenz: {{ resultInfer.latency_ms }}ms</small>
         </div>
       </div>
     </div>
@@ -75,6 +85,8 @@
 import { ref } from 'vue';
 import { api } from '../services/api';
 
+const provider = ref('openai');
+
 // State Inferenz
 const inputText = ref('');
 const loadingInfer = ref(false);
@@ -94,7 +106,9 @@ const runInference = async () => {
   error.value = null;
   resultInfer.value = null;
   try {
-    resultInfer.value = await api.ai.infer(inputText.value);
+    // 🔌 HANDSHAKE: Wir schicken den gewählten Provider ('openai' oder 'deepseek')
+    // an das Backend. Die Factory dort entscheidet dann.
+    resultInfer.value = await api.ai.infer(inputText.value, provider.value);
   } catch (err) {
     error.value = err.message;
   } finally {
@@ -107,7 +121,7 @@ const generateIdeas = async () => {
   error.value = null;
   resultIdeas.value = null;
   try {
-    resultIdeas.value = await api.ai.generateIdeas(ideaTopic.value, ideaCount.value);
+    resultIdeas.value = await api.ai.generateIdeas(ideaTopic.value, ideaCount.value, provider.value);
   } catch (err) {
     error.value = err.message;
   } finally {
@@ -124,6 +138,25 @@ section {
 }
 
 h2 { color: #333; margin-bottom: 20px; }
+
+.provider-select {
+    background: #e9ecef;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border: 1px solid #dee2e6;
+}
+.provider-select label { font-weight: bold; color: #495057; }
+.provider-select select {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    font-size: 1rem;
+    min-width: 200px;
+}
 
 .ki-interface {
   background: #fdfdfd;

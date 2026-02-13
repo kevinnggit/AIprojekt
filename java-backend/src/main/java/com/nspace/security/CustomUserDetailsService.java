@@ -7,8 +7,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
@@ -26,7 +24,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                new ArrayList<>() // Authorities/Roles can be mapped here
-        );
+                // SECURITY CRITICAL: Mapping der DB-Rolle (z.B. "ROLE_ADMIN") zur Spring
+                // Authority.
+                // Ohne das weiß Spring Security nicht, dass dieser User Admin-Rechte hat!
+                java.util.List
+                        .of(new org.springframework.security.core.authority.SimpleGrantedAuthority(user.getRole())));
     }
 }

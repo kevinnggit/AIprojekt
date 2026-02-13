@@ -1,6 +1,7 @@
 package com.nspace.dto;
 
 import java.time.LocalDateTime;
+import com.nspace.model.AppointmentStatus;
 
 public record AppointmentResponse(
         Long id,
@@ -8,5 +9,5 @@ public record AppointmentResponse(
         String topic,
         LocalDateTime startTime,
         LocalDateTime endTime,
-        String status) {
+        AppointmentStatus status) { // Use Enum directly
 }

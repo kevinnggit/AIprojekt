@@ -4,6 +4,7 @@ import com.nspace.security.CustomUserDetailsService;
 import com.nspace.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -37,31 +38,34 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // CSRF ausschalten, da wir Stateless (JWT) nutzen. Nötig für APIs.
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS aktivieren (damit Vue
-                                                                                   // zugreifen darf)
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // Public Endpoints (ohne Login)
+                        // Public Endpoints
                         .requestMatchers(new AntPathRequestMatcher("/api/auth/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/termine/**")).permitAll() // TODO: In
-                                                                                                   // Produktion auf
-                                                                                                   // .authenticated()
-                                                                                                   // ändern!
+
+                        // Appointment Security Rules
+                        // Admin actions (Delete & Confirm)
+                        .requestMatchers(new AntPathRequestMatcher("/api/termine/*/confirm", "PUT")).hasRole("ADMIN")
+                        .requestMatchers(new AntPathRequestMatcher("/api/termine/*", "DELETE")).hasRole("ADMIN")
+
+                        // Public actions (Create & List) - Allow everything else under /api/termine
+                        .requestMatchers(new AntPathRequestMatcher("/api/termine/**")).permitAll()
+
+                        // Portfolio Public
+                        .requestMatchers(new AntPathRequestMatcher("/api/portfolio/**")).permitAll()
+
+                        // Admin Area (Global)
+                        .requestMatchers(new AntPathRequestMatcher("/api/admin/**")).hasRole("ADMIN")
+
+                        // Error handling
                         .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
-                        // Alles andere braucht Auth
+
+                        // Default: Authenticated
                         .anyRequest().authenticated())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Server
-                                                                                                              // speichert
-                                                                                                              // KEINE
-                                                                                                              // Session.
-                                                                                                              // Jeder
-                                                                                                              // Request
-                                                                                                              // muss
-                                                                                                              // Token
-                                                                                                              // haben.
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Unser Filter kommt VOR
-                                                                                             // dem Standard-Login
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

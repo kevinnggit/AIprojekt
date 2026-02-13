@@ -25,9 +25,16 @@
           <label>Thema:</label>
           <input v-model="form.topic" required placeholder="Worum geht es?" />
         </div>
-        <div class="form-group">
-          <label>Zeitpunkt:</label>
-          <input v-model="form.startTime" type="datetime-local" required />
+        <div class="form-group span-2">
+          <label>Zeitpunkt auswählen:</label>
+          <CalendarView 
+            :bookedAppointments="termine"
+            :maxMonths="maxMonths"
+            @slot-selected="onSlotSelected"
+          />
+          <div v-if="form.startTime" class="selected-time">
+            Gewählt: {{ new Date(form.startTime).toLocaleString('de-DE') }}
+          </div>
         </div>
         
         <button type="submit" :disabled="loading" class="primary-btn">
@@ -65,6 +72,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { api } from '../services/api';
+import CalendarView from '../components/CalendarView.vue';
 
 const termine = ref([]);
 const loading = ref(false);
@@ -85,6 +93,9 @@ const formatDate = (ts) => {
 const loadTermine = async () => {
   loading.value = true;
   try {
+    const config = await api.termine.getConfig();
+    if(config.booking_window_months) maxMonths.value = config.booking_window_months;
+
     termine.value = await api.termine.getAll();
   } catch (e) {
     error.value = "Fehler beim Laden: " + e.message;
@@ -93,11 +104,20 @@ const loadTermine = async () => {
   }
 };
 
+const maxMonths = ref(3); // Default
+
+const onSlotSelected = (isoString) => {
+  form.value.startTime = isoString;
+};
+
 const createTermin = async () => {
+  if (!form.value.startTime) {
+    error.value = "Bitte einen Termin im Kalender auswählen.";
+    return;
+  }
   loading.value = true;
   error.value = null;
   try {
-    // Sekunden anhängen für ISO Format, falls nötig
     const payload = {
       ...form.value,
       startTime: form.value.startTime.length === 16 ? form.value.startTime + ':00' : form.value.startTime

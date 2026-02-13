@@ -44,6 +44,8 @@ services:
       - postgres
     networks:
       - app-network
+    volumes:
+      - ./logs:/app/logs
 
   python-backend:
     build:
@@ -70,6 +72,8 @@ services:
       - postgres
     networks:
       - app-network
+    volumes:
+      - ./logs:/app/logs
 
   postgres:
     image: postgres:15-alpine

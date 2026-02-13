@@ -3,6 +3,7 @@ from typing import List, Optional
 
 class InferRequest(BaseModel):
     text: str
+    provider: Optional[str] = "openai"
 
 class InferResponse(BaseModel):
     model: str
@@ -13,6 +14,7 @@ class InferResponse(BaseModel):
 class IdeaRequest(BaseModel):
     topic: str
     count: int = 3
+    provider: Optional[str] = "openai"
 
 class IdeaResponse(BaseModel):
     topic: str

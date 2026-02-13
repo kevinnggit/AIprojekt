@@ -18,44 +18,55 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+    private final org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
-            AuthenticationManager authenticationManager) {
+            AuthenticationManager authenticationManager,
+            org.springframework.security.core.userdetails.UserDetailsService userDetailsService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authenticationManager;
+        this.userDetailsService = userDetailsService;
     }
 
     public LoginResponse login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.username(), request.password()));
 
-        // If authentication successful, generate token
-        // Use user details or optional logic
-        var user = userRepository.findByUsername(request.username()).orElseThrow();
-        // Create UserDetails object or just pass custom one if implemented
-        // For simplicity, we can load UserDetails via the service or just construct
-        // basic one here for token gen if needed,
-        // but easier to rely on what JwtUtil expects (UserDetails).
-        // Let's create a UserDetails implementation on the fly or load it.
-        // Actually, CustomUserDetailsService does the loading.
-        // Let's manually construct it for now to match JwtUtil signature:
-        org.springframework.security.core.userdetails.UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                user.getUsername(), user.getPassword(), new java.util.ArrayList<>());
-
+        var userDetails = userDetailsService.loadUserByUsername(request.username());
         String token = jwtUtil.generateToken(userDetails);
         return new LoginResponse(token);
     }
 
-    public void register(RegisterRequest request) {
-        if (userRepository.findByUsername(request.username()).isPresent()) {
-            throw new RuntimeException("Username already exists");
+    public LoginResponse register(RegisterRequest request) {
+        return registerUser(request.username(), request.password(), "ROLE_USER");
+    }
+
+    public LoginResponse registerAdmin(RegisterRequest request) {
+        return registerUser(request.username(), request.password(), "ROLE_ADMIN");
+    }
+
+    private LoginResponse registerUser(String username, String password, String role) {
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new IllegalArgumentException("Username already taken: " + username);
         }
-        var user = new User(
-                request.username(),
-                passwordEncoder.encode(request.password()),
-                request.role() == null ? "ROLE_USER" : request.role());
+
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole(role);
+
         userRepository.save(user);
+
+        // Auto-login after register? Or just return token.
+        // For admin creating other admins, we don't want to login as them. We just want
+        // to return "Success".
+        // But for consistency with existing public register, we generate token.
+        // We can ignore the token in AdminController.
+
+        var userDetails = userDetailsService.loadUserByUsername(username);
+        String token = jwtUtil.generateToken(userDetails);
+        return new LoginResponse(token);
     }
 }
