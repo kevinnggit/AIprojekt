@@ -1,63 +1,50 @@
-# Specification: Admin Security & Auth Refactor
+# Admin-Sicherheit: Cookie-Auth und Route Guards
 
-**Feature ID:** SEC-001
+**Feature:** SEC-001
 **Sprint:** 08
 
-## User Story
-Als Administrator möchte ich, dass mein Login sicher ist und Sitzungen über Cookies verwaltet werden, um XSS-Angriffe zu erschweren, und dass unbefugte Nutzer keinen Zugriff auf Admin-Routen haben.
+## Was sich ändern soll
 
-## Requirements
+Aktuell speichern wir das JWT im LocalStorage und schicken es als `Authorization: Bearer`-Header mit. Das ist ein XSS-Risiko — jedes injizierte Script kann den Token stehlen und sich als Admin ausgeben.
 
-### 1. Route Guards (Frontend)
-- Alle Routen unter `/admin` müssen geschützt sein.
-- Wenn `isAuthenticated` false ist -> Redirect zu `/login`.
-- Global Navigation Guard in `vue-router`.
+Ziel: JWT in einem HttpOnly Cookie, das der Browser automatisch mitschickt und auf das JavaScript keinen Zugriff hat.
 
-### 2. Cookie Authentication (Backend/Frontend)
-- **Status Quo:** Token im LocalStorage -> Header `Authorization: Bearer xyz`.
-- **Target State:** Token im HttpOnly Cookie.
+## Backend-Änderungen (Java)
 
-#### Flow
-1.  **Login Request:** User sendet POST User/Pass.
-2.  **Login Response:** Server setzt `Set-Cookie: jwt_token=...; HttpOnly; Path=/; Max-Age=3600; SameSite=Strict`. Body enthält user info (role, name), aber KEIN Token.
-3.  **API Requests:** Browser sendet Cookie automatisch mit.
-4.  **Backend Filter:** `JwtAuthenticationFilter` liest Token aus Cookie (statt Header).
+**Login-Response anpassen:**
+1. `AuthController.login()` setzt statt dem Token im Body jetzt ein Cookie:
+    - `Set-Cookie: jwt_token=...; HttpOnly; Path=/; Max-Age=3600; SameSite=Strict`
+    - Der Response-Body enthält nur noch Nutzerinfos (Rolle, Name), aber kein Token.
+2. `JwtAuthenticationFilter` liest das Token aus dem Cookie statt aus dem Header.
+    - Als Fallback bleibt der Header-Check erhalten — so funktioniert das Testen mit Postman weiterhin.
 
-#### Logout
-- Endpoint `/api/auth/logout` löscht das Cookie (Max-Age=0).
+**Logout:**
+- `POST /api/auth/logout` löscht das Cookie indem `Max-Age=0` gesetzt wird.
 
-## Technical Implementation Steps
+## Frontend-Änderungen (Vue)
 
-### Backend (Java)
-1.  Modify `AuthController.login`:
-    - Erstelle `ResponseCookie`.
-    - `response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString())`.
-2.  Modify `JwtRequestFilter`:
-    - Check Request Cookies for `jwt_token`.
-    - Fallback to Header (good for API testing via Postman).
+**Auth-Store (`stores/auth.js`):**
+- `localStorage.setItem('token', ...)` komplett entfernen.
+- Nach erfolgreichem Login: `this.user = response.user` (Nutzerinfos aus dem Response-Body).
+- `isAuthenticated` basiert nicht mehr auf dem Token aus LocalStorage, sondern auf einem `/api/auth/me`-Aufruf beim App-Start.
 
-### Frontend (Vue)
-1.  UPDATE `auth.store`:
-    - Remove `localStorage.setItem('token')`.
-    - Login action calls API, then sets `this.user = response.user`.
-    - `isAuthenticated` state relies on successful API calls (catch 401).
-    - **WICHTIG:** Wir brauchen einen `/api/auth/me` Endpoint, den wir beim App-Start aufrufen, um zu prüfen, ob das Cookie noch gültig ist.
+**Neuer Endpunkt nötig:** `/api/auth/me` — gibt Nutzerinfos zurück wenn das Cookie gültig ist, sonst 401. Damit weiß das Frontend nach einem Reload, ob die Session noch läuft.
 
-### Router
-1.  In `router/index.js`:
-    ```javascript
-    router.beforeEach(async (to, from, next) => {
-      const auth = useAuthStore();
-      if (to.meta.requiresAuth && !auth.isAuthenticated) {
-          // Versuch Session wiederherzustellen via /me endpoint
-          try { await auth.checkSession(); } catch { return next('/login'); }
-      }
-      next();
-    });
-    ```
+**Route Guards (`router/index.js`):**
+```javascript
+router.beforeEach(async (to, from, next) => {
+  const auth = useAuthStore();
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+      // Versuch Session wiederherzustellen via /me endpoint
+      try { await auth.checkSession(); } catch { return next('/login'); }
+  }
+  next();
+});
+```
 
-## Acceptance Criteria
-- [ ] Zugriff auf `/admin` ohne Login leitet auf `/login` um.
-- [ ] Nach Login ist kein Token im LocalStorage zu finden.
-- [ ] API Requests funktionieren weiterhin.
-- [ ] Reload der Seite behält den Login-Status (persistiert durch Cookie).
+## Zu testen
+
+- Direktaufruf von `/admin` ohne Login muss auf `/login` weiterleiten.
+- Nach erfolgreichem Login darf kein Token im LocalStorage stehen.
+- API-Requests müssen weiterhin funktionieren.
+- Nach Seiten-Reload muss der Login-Status erhalten bleiben (weil das Cookie auf dem Browser liegt).

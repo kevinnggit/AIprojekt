@@ -1,37 +1,42 @@
-# Product Backlog
+# Produkt-Backlog
 
-**Last Updated:** 11.01.2026
-**Owner:** Senior Product Owner
+**Stand:** 11.01.2026
 
-## Sprint 11 (Active)
-**Focus:** Security, AI-UX, Admin Control
+## Sprint 11 (aktiv)
+**Fokus:** Sicherheit, KI-UX, Admin-Kontrolle
 
-### [A] Admin Security Hardening (SEC-001)
-- **Status:** Planning -> Implementation
-- **Scope:** HttpOnly Cookies for Auth, Route Guards in Frontend.
-- **Why:** Prevent XSS, Secure Admin Panel.
+### [A] Sicherheits-Härtung Admin (SEC-001)
+- **Status:** Planung → Umsetzung
+- **Umfang:** HttpOnly Cookies für Auth, Route Guards im Frontend.
+- **Warum:** XSS verhindern, Admin-Bereich absichern.
 
-### [B] AI UI Refactor (AI-002)
-- **Status:** Planning -> Implementation
-- **Scope:** Dynamic Menus (Provider -> Model -> Task).
-- **Why:** Better UX, Showcase capability.
+### [B] KI UI-Umbau (AI-002)
+- **Status:** Planung → Umsetzung
+- **Umfang:** Dynamische Menüs (Provider → Modell → Aufgabe).
+- **Warum:** Bessere UX, Funktionen besser präsentieren.
 
-### [C] Admin Activity Monitor (ADM-003)
-- **Status:** New
-- **Scope:** System Health Stats (Backend Logs/Metrics) in Dashboard.
-- **Why:** "Full Control" requirement.
+### [C] Admin-Aktivitätsmonitor (ADM-003)
+- **Status:** Neu
+- **Umfang:** System-Health-Stats (Backend-Logs/Metriken) im Dashboard.
+- **Warum:** Vollständige Übersicht über den Betrieb.
 
-### [D] Email Confirmation Loop (USER-001)
-- **Status:** Planned
-- **Scope:** MailHog + JavaMailSender.
-- **Why:** Reliability.
+### [D] E-Mail-Bestätigung (USER-001)
+- **Status:** Geplant
+- **Umfang:** MailHog + JavaMailSender.
+- **Warum:** Zuverlässigkeit für Endnutzer.
 
-## Completed / In Review
-- **Calendar UI (Sprint 7)** - Done.
-- **Portfolio Management (Basic)** - Frontend & Controller exist. Needs Polish?
-- **Sprints 8-10** - (Internal/Skipped Documentation)
+---
 
-## Future / Icebox
-- **Payment Integration** (Stripe) - Pending Business Decision.
-- **Public User Accounts** - Pending.
-- **HTTPS Certs** (Let's Encrypt) - Production Step.
+## Abgeschlossen / In Review
+
+- **Kalender UI (Sprint 7)** - Fertig.
+- **Portfolio-Verwaltung (Basis)** - Frontend & Controller vorhanden. Braucht noch Feinschliff.
+- **Sprints 8–10** - Interne Dokumentation.
+
+---
+
+## Später / Geparkt
+
+- **Zahlungsintegration** (Stripe) - Wartet auf Geschäftsentscheidung.
+- **Öffentliche Nutzerkonten** - Noch offen.
+- **HTTPS-Zertifikate** (Let's Encrypt) - Produktionsschritt.

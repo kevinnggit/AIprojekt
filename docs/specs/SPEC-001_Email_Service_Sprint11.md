@@ -1,44 +1,41 @@
-# Specification: Transactional Email Service
+# E-Mail-Bestätigung für Terminbuchungen
 
-**Feature ID:** USER-001
+**Feature:** USER-001
 **Sprint:** 08
 
-## User Story
-Als Nutzer möchte ich eine Email-Bestätigung erhalten, wenn ich einen Termin gebucht habe, damit ich alle Details schriftlich habe.
+## Ziel
 
-## Requirements
+Wenn ein Nutzer sich einen Termin bucht, soll er direkt eine E-Mail-Bestätigung bekommen. So hat er alle Details schriftlich und das System wirkt nicht kaputt.
 
-### 1. Functional Requirements
-- **Trigger:** Nach erfolgreichem `POST /api/termine`.
-- **Inhalt:**
-    - "Hallo [Name],"
-    - "Dein Termin am [Datum] um [Uhrzeit] wurde vorgemerkt."
-    - "Wir melden uns bald."
-- **Failure Handling:** Wenn Email-Versand scheitert, soll der Termin *trotzdem* gebucht sein (Async oder log warning). User bekommt im UI "Termin gebucht (Email konnte nicht gesendet werden)" oder wir ignorieren es silent.
+## Was die E-Mail enthalten soll
 
-### 2. Technical Requirements
-- **Technology:** Java Spring Boot (`spring-boot-starter-mail`).
-- **SMTP Server:**
-    - Dev: `MailHog` (Docker Container) -> Fängt Emails ab, zeigt sie im Browser.
-    - Prod: Google SMTP oder SendGrid (via ENV Variables).
-- **Architecture:**
-    - `EmailService` Class (@Service).
-    - `JavaMailSender` injection.
-    - Async Execution (Optional: `@Async` damit User nicht wartet).
+- "Hallo [Name],"
+- "Dein Termin am [Datum] um [Uhrzeit] wurde vorgemerkt."
+- "Wir melden uns bald."
 
-## Technical Implementation Steps
+Wenn der E-Mail-Versand fehlschlägt, soll der Termin trotzdem in der Datenbank gespeichert werden. Der Fehler wird geloggt, der Nutzer sieht im schlimmsten Fall nichts davon — das ist besser als ein gebuchter Termin, der stillschweigend verschwindet.
 
-### Backend (Java)
-1.  [Dependency] Add `spring-boot-starter-mail` to `pom.xml`.
-2.  [Config] Add SMTP properties to `application.properties` (use Env Vars).
-3.  [Docker] Add `mailhog/mailhog` to `docker-compose.yml` (Port 1025 for SMTP, 8025 for UI).
-4.  [Code] Create `EmailService.java`:
+## Umsetzung (Backend Java)
+
+1. Abhängigkeit `spring-boot-starter-mail` in `pom.xml` eintragen.
+2. SMTP-Einstellungen in `application.properties` über Umgebungsvariablen konfigurieren.
+3. In `docker-compose.yml` einen `mailhog/mailhog`-Container hinzufügen (Port 1025 für SMTP, 8025 für die Web-UI).
+4. `EmailService.java` als `@Service` erstellen:
     ```java
     void sendConfirmation(String to, String name, LocalDateTime date);
     ```
-5.  [Integration] Call `emailService.sendConfirmation(...)` in `AppointmentService.createAppointment`.
+5. In `AppointmentService.createAppointment` den E-Mail-Versand aufrufen.
 
-## Acceptance Criteria
-- [ ] Docker Compose startet MailHog.
-- [ ] Nach Buchung sehe ich im MailHog UI (localhost:8025) die Email.
-- [ ] Termin ist in DB gespeichert.
+**Hinweis zur Async-Ausführung:** Mit `@Async` kann der Versand im Hintergrund laufen, damit der Nutzer nicht auf die Antwort des SMTP-Servers wartet.
+
+## SMTP-Konfiguration
+
+- **Entwicklung:** MailHog läuft als Docker-Container und fängt alle E-Mails ab. Nichts wird wirklich versendet, aber man kann alles unter `localhost:8025` im Browser einsehen.
+- **Produktion:** Google SMTP oder SendGrid über Umgebungsvariablen.
+
+## Testen
+
+- Docker Compose starten, MailHog sollte mit hochkommen.
+- Termin buchen.
+- Im Browser `localhost:8025` öffnen — die Bestätigungsmail muss dort erscheinen.
+- Der Termin muss parallel in der Datenbank stehen.

@@ -1,46 +1,43 @@
-# Sprint Plan: SPRINT-11
+# Sprint 11
 **Motto:** "Security, Intelligence & Control"
-**Goal:** Professionalize the platform with industrial-grade security (Cookies), advanced AI controls, and deep system visibility.
+**Ziel:** Die Plattform professionalisieren — bessere Sicherheit (Cookies), mehr KI-Kontrolle und tiefere Systemsicht für den Admin.
 
-## 🎯 Sprint Goal
-Wir härten die Anwendung gegen Angriffe (Cookie-Auth, HTTPS-Prep), geben dem Admin volle Transparenz (Activity Logs) und dem User volle Kontrolle über die KI (Multi-Model UI).
+## Was wir angehen
 
-## 📋 Ticket Selection
+### 1. Admin Sicherheits-Umbau (SEC-001)
+- **Priorität:** Kritisch
+- **Aufgaben:**
+    - [Backend] Wechsel von Header-Token zu HttpOnly Cookies.
+    - [Frontend] Route Guards einbauen (Redirect zu Login wenn kein Cookie).
+    - [Frontend] Token aus LocalStorage entfernen.
 
-### 1. Admin Security Refactor (SEC-001)
-- **Status:** Critical
-- **Todo:**
-    - [Backend] Switch from Header-Token to **HttpOnly Cookies**.
-    - [Frontend] Implement Route Guards (Redirect to login if no cookie).
-    - [Frontend] Remove Token from LocalStorage.
+### 2. KI UI-Umbau (AI-002)
+- **Priorität:** Neue Anforderung
+- **Aufgaben:**
+    - [Frontend] Dynamisches Menü: Provider (OpenAI/DeepSeek/Ollama/gemini/claude/Mistral) → Modell → Aufgabe.
+    - [Frontend] Aufgaben-Umschaltung: "Chat" vs. "Projekt-Generator" (Formulare ein-/ausblenden).
+    - [Backend] Sicherstellen, dass das Python-Backend diese Parameter annimmt.
+    - [Backend] Für jeden Provider einen Platzhalter für den API-Key anlegen (wo Keys gespeichert werden).
 
-### 2. AI UI Refactor (AI-002)
-- **Status:** New Requirement
-- **Todo:**
-    - [Frontend] Dynamisches Menü: Provider (OpenAI/DeepSeek/Ollama/gemini/claude/Mistral) -> Model -> Task.
-    - [Frontend] Task-Switching: "Chat" vs. "Project Generator" (Formulare ein-/ausblenden).
-    - [Backend] Ensure Python backend accepts these params.
-    - [Backend] stelle sicher dass die Parameter in der API angenommen werden und dass ein vorgesehener platzhalter für jede API-Key existiert(Wo ich die Keys speichern soll).
+### 3. Admin-Erweiterungen: Aktivität & Portfolio (ADM-003)
+- **Priorität:** Verbesserung
+- **Aufgaben:**
+    - [Frontend] "Dashboard"-Übersicht mit Live-Stats (Termine heute, Fehler, API-Aufrufe).
+    - [Backend] Einfacher Aktivitäts-Log oder Stats-Endpunkt (`/api/admin/stats`).
+    - [Portfolio] Bestehende Implementierung reviewen und aufpolieren.
 
-### 3. Admin Extensions: Activity & Portfolio (ADM-003)
-- **Status:** Enhancement
-- **Todo:**
-    - [Frontend] "Dashboard"-Overview Tab mit Live-Stats (Termine heute, Errors, API Calls).
-    - [Backend] Simple "Activity Log" oder Stats-Endpoint (`/api/admin/stats`).
-    - [Portfolio] Review Existing Implementation (Polishing).
+### 4. Infrastruktur & HTTPS (INF-001)
+- **Priorität:** Planung/Doku
+- **Aufgaben:**
+    - Doku schreiben: "Wie HTTPS aktivieren" (Nginx Proxy).
+    - `docker-compose.yml` härtren.
 
-### 4. Infrastructure & HTTPS (INF-001)
-- **Status:** Planning/Docs
-- **Todo:**
-    - Prepare Doc "How to enable HTTPS" (Nginx Proxy).
-    - Hardening `docker-compose.yml`.
+## Zeitplan
+- **Tag 1:** Sicherheits-Umbau (Cookie-Logik ist tricky).
+- **Tag 2:** KI-Umbau (Vue-Komponenten).
+- **Tag 3:** Admin-Stats und Dokumentation.
 
-## 📅 Schedule
-- **Day 1:** Security Refactor (Cookie Logic is tricky).
-- **Day 2:** AI Refactor (Vue Components).
-- **Day 3:** Admin Stats & Documentation.
-
-## 📦 Deliverables
-- **Secure Auth:** No more JWT in LocalStorage.
-- **Improved AI UI:** Dropdown for Models.
-- **Admin Stats:** A view showing system health.
+## Was am Ende fertig sein soll
+- Sicheres Auth: Kein JWT mehr in LocalStorage.
+- Verbessertes KI-Interface: Dropdown für Modelle.
+- Admin-Stats: Eine Ansicht, die den Systemzustand zeigt.
