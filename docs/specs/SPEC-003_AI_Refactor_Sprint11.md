@@ -1,35 +1,39 @@
-# Specification: AI UI Refactor
+# KI-Interface: Provider- und Modellauswahl
 
-**Feature ID:** AI-002
+**Feature:** AI-002
 **Sprint:** 08
 
-## User Story
-Als User möchte ich über ein zentrales Menü steuern, was ich von der KI will (Chatten, Bilder malen, Ideen finden) und welches "Gehirn" (Modell) ich dafür nutze, damit das Interface nicht mit ungenutzten Feldern überladen ist.
+## Was sich ändern soll
 
-## Requirements
+Die aktuelle KI-Seite zeigt immer alle Felder gleichzeitig. Das ist unübersichtlich. Wir wollen, dass der Nutzer erst den Provider wählt, dann das Modell, und dann den Modus (Chat oder Ideengenerator). Was nicht gebraucht wird, ist ausgeblendet.
 
-### 1. Provider & Model Selection
-Das Auswahlmenü muss hierarchisch sein (oder smart):
-- **Provider:** OpenAI, DeepSeek, (Mock)
-- **Model:** Abhängig vom Provider (z.B. OpenAI -> gpt-4o, gpt-3.5-turbo; DeepSeek -> v3)
+## Provider und Modelle
 
-### 2. Task Selection (Der "Modus")
-Dropdown/Tabs für "Aufgabe":
-1.  **Chat / Analyse** (Standard) -> Zeigt Textfeld für Input.
-2.  **Projekt-Ideen** -> Zeigt Formular für Thema + Anzahl.
-3.  **Image Gen** (Placeholder) -> Zeigt Prompt-Feld.
+Das Auswahlmenü ist hierarchisch:
+- **Provider:** OpenAI, DeepSeek, Mock (weitere geplant)
+- **Modell:** Ändert sich je nach Provider
+    - OpenAI: `gpt-4o`, `gpt-3.5-turbo`
+    - DeepSeek: `v3`
 
-### 3. Dynamic UI
-- Wenn "Chat" gewählt ist, darf das "Projekt-Ideen"-Formular NICHT sichtbar sein.
-- Die UI muss sich *sofort* ändern (Conditional Rendering `v-if`).
+## Aufgaben-Modus
 
-### 4. Technical Constraints
-- Backend muss dynamisch entscheiden, welchen Provider es nutzt (wurde in Sprint 7 vorbereitet?).
-- Frontend muss die Auswahl (Provider + Model) bei jedem Request mitschicken.
+Dropdown oder Tabs für den "Modus":
+1. **Chat / Analyse** (Standard) — Textfeld für freien Input.
+2. **Projekt-Ideen** — Formular für Thema und Anzahl der Ideen.
+3. **Bildgenerierung** (Platzhalter) — Prompt-Feld für spätere Implementierung.
 
-## Acceptance Criteria
-- [ ] Es gibt ein Dropdown für "Provider" (OpenAI, DeepSeek).
-- [ ] Es gibt ein Dropdown für "Model" (ändert sich je nach Provider).
-- [ ] Es gibt ein Dropdown für "Task" (Chat, Ideen).
-- [ ] Wähle ich "Ideen", verschwindet das Chat-Fenster und das Ideen-Formular erscheint.
-- [ ] Der API-Request sendet `provider` und `model` Parameter korrekt an das Python-Backend.
+Wenn "Chat" gewählt ist, ist das Ideen-Formular nicht sichtbar — und umgekehrt. Das Umschalten passiert sofort via `v-if`, kein Reload.
+
+## Backend-Seite (Python)
+
+Das Python-Backend nimmt bereits einen `provider`-Parameter entgegen. Prüfen, ob auch `model` angenommen wird. Falls nicht, Endpunkt entsprechend erweitern.
+
+Für neue Provider (Gemini, Claude, Mistral) müssen Platzhalter für die API-Keys in der `.env`-Datei und in `config.py` angelegt werden, auch wenn die Implementierung noch fehlt. So ist der Weg vorbereitet.
+
+## Zu testen
+
+- Dropdown für Provider zeigt OpenAI, DeepSeek.
+- Dropdown für Modell aktualisiert sich wenn Provider wechselt.
+- Dropdown für Modus vorhanden (Chat, Ideen).
+- Bei "Ideen"-Auswahl: Chat-Fenster verschwindet, Ideen-Formular erscheint.
+- API-Request schickt `provider` und `model` korrekt ans Python-Backend.
