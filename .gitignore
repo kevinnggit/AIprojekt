@@ -35,6 +35,9 @@ coverage
 
 tmp/
 
+# Java Upgrade Tool — interne Upgrade-Protokolle, nicht für GitHub
+java-backend/.github/java-upgrade/
+
 
 
 

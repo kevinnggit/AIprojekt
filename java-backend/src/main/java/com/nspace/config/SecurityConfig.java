@@ -23,6 +23,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * Zentrale Sicherheitskonfiguration der Anwendung.
+ *
+ * <p>Diese Klasse definiert die gesamte HTTP-Sicherheitsstrategie: Welche Endpunkte
+ * öffentlich zugänglich sind, welche eine Admin-Rolle erfordern, wie CORS konfiguriert
+ * wird und dass die Anwendung vollständig zustandslos (stateless) operiert.
+ * Der JWT-Filter wird hier in die Spring Security-Filterkette eingehängt.</p>
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -35,6 +43,17 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
+    /**
+     * Konfiguriert die HTTP-Sicherheitskette mit Zugriffs- und Sessionregeln.
+     *
+     * <p>CSRF ist deaktiviert, da die API zustandslos (stateless) ist und JWT
+     * als Schutzmechanismus dient. Der JWT-Filter wird vor dem Standard-Login-Filter
+     * platziert, damit Token-basierte Anfragen korrekt verarbeitet werden.</p>
+     *
+     * @param http das zu konfigurierende {@link HttpSecurity}-Objekt
+     * @return die fertig konfigurierte {@link SecurityFilterChain}
+     * @throws Exception bei Konfigurationsfehlern
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -63,13 +82,21 @@ public class SecurityConfig {
 
                         // Default: Authenticated
                         .anyRequest().authenticated())
+                // Keine HTTP-Session – jede Anfrage muss sich selbst über JWT authentifizieren
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
+                // JWT-Filter läuft VOR dem Standard-UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
+    /**
+     * Erstellt einen {@link AuthenticationProvider}, der Benutzer anhand der Datenbank
+     * und BCrypt-verschlüsselter Passwörter verifiziert.
+     *
+     * @return konfigurierter {@link DaoAuthenticationProvider}
+     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -78,16 +105,39 @@ public class SecurityConfig {
         return authProvider;
     }
 
+    /**
+     * Stellt den {@link AuthenticationManager} als Spring-Bean bereit,
+     * damit er in Services per Dependency Injection genutzt werden kann.
+     *
+     * @param config die von Spring verwaltete Authentifizierungskonfiguration
+     * @return der konfigurierte {@link AuthenticationManager}
+     * @throws Exception bei Initialisierungsfehlern
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
+    /**
+     * Definiert BCrypt als Passwort-Hashing-Algorithmus.
+     * BCrypt ist bewusst rechenintensiv, um Brute-Force-Angriffe zu erschweren.
+     *
+     * @return eine {@link BCryptPasswordEncoder}-Instanz
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Konfiguriert die CORS-Richtlinien für die gesamte API.
+     *
+     * <p>Alle Ursprünge sind erlaubt, um die Entwicklung mit dem Vue-Frontend
+     * zu vereinfachen. In einer Produktionsumgebung sollte dies auf bekannte
+     * Origins eingeschränkt werden.</p>
+     *
+     * @return die CORS-Konfigurationsquelle
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
