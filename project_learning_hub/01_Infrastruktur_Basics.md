@@ -56,7 +56,21 @@ graph TD
     -   **Außen (Host):** Wir mappen diese auf Ports Ihres PCs (z.B. Frontend an `3000`).
     -   *Merke:* Die Container untereinander nutzen IMMER die inneren Ports.
 
-## 2. Die Datenbank-Initialisierung
+## 2. Base Images & Java-Version
+
+Jeder Container baut auf einem spezialisierten, schlanken Basis-Image auf:
+
+| Container | Base Image | Warum dieses Image? |
+| :--- | :--- | :--- |
+| `vue-frontend` | `node:20-slim` (Build) + `nginx:alpine` (Runtime) | Kleines, sicherheits-optimiertes NGINX-Image |
+| `java-backend` | `eclipse-temurin:21-jdk` | Offizielles OpenJDK 21 LTS von Adoptium — produktionsreif |
+| `python-backend` | `python:3.11-slim` | Schlanke Python-3.11-Laufzeitumgebung |
+| `postgres` | `postgres:16` | Offizielles PostgreSQL-Image |
+
+**Warum `eclipse-temurin:21-jdk` und nicht `openjdk:17`?**
+Wir setzen bewusst auf **Java 21 LTS** (Long-Term Support). Eclipse Temurin ist die von der Community bevorzugte, produktionserprobte OpenJDK-Distribution. LTS bedeutet: diese Version wird bis 2028 aktiv mit Sicherheits-Patches versorgt. Das ist für Enterprise-Anwendungen unverzichtbar.
+
+## 3. Die Datenbank-Initialisierung
 
 Ein häufiger Anfängerfehler ist es, Backend-Services zu starten, bevor die Datenbank bereit ist.
 Unsere Lösung: `docker/init.sql`.

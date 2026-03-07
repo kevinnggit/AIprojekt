@@ -2,6 +2,14 @@ package com.nspace.model;
 
 import jakarta.persistence.*;
 
+/**
+ * JPA-Entität, die einen Systembenutzer repräsentiert.
+ *
+ * <p>Benutzer werden in der Tabelle {@code app_users} gespeichert. Der Name der Tabelle
+ * weicht bewusst vom Klassennamen ab, da {@code user} ein reserviertes Schlüsselwort
+ * in PostgreSQL ist. Jeder Benutzer besitzt genau eine Rolle, die von Spring Security
+ * zur Autorisierung ausgewertet wird.</p>
+ */
 @Entity
 @Table(name = "app_users")
 public class User {
@@ -16,6 +24,8 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    // Zulässige Werte: "ROLE_USER" und "ROLE_ADMIN" – das Präfix "ROLE_" ist
+    // von Spring Security vorgeschrieben und wird zur Auswertung von hasRole() benötigt
     @Column(nullable = false)
     private String role; // "ROLE_USER", "ROLE_ADMIN"
 

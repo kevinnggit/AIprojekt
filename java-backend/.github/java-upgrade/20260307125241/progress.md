@@ -108,7 +108,7 @@ No code changes in this step (baseline only)
 - Deferred Work: None — all goals achieved
 
 ### Commit
-See git commit on branch appmod/java-upgrade-20260307125241
+ddc23b1 - Step 3+4: Java 21 LTS upgrade - Compile: SUCCESS | Tests: 2/2 passed
 
 ---
 

@@ -3,6 +3,14 @@ package com.nspace.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * JPA-Entität, die einen Terminbuchungseintrag in der Datenbank repräsentiert.
+ *
+ * <p>Ein Termin wird durch einen Buchenden (Name, E-Mail), ein Gesprächsthema sowie
+ * einen Zeitraum (Start- und Endzeit) beschrieben. Der Status durchläuft den
+ * Lebenszyklus {@code PENDING -> CONFIRMED} bzw. kann durch den Admin gelöscht werden.
+ * Die Endzeit wird immer serverseitig als Startzeit + 1 Stunde berechnet.</p>
+ */
 @Entity // Sagt Hibernate: Erstelle/Mappe eine Datenbank-Tabelle für diese Klasse
 @Table(name = "appointments") // Name der Tabelle in der DB
 public class Appointment {
@@ -26,6 +34,9 @@ public class Appointment {
     @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
 
+    // Der Status wird als String in der DB gespeichert (EnumType.STRING),
+    // nicht als Ordinalzahl – das macht die DB menschenlesbar und ist robuster
+    // bei künftigen Enum-Erweiterungen
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AppointmentStatus status; // "PENDING", "CONFIRMED", "CANCELLED"
@@ -33,6 +44,15 @@ public class Appointment {
     public Appointment() {
     }
 
+    /**
+     * Erstellt einen neuen Termin und setzt den Status automatisch auf {@code PENDING}.
+     *
+     * @param name      Name des Buchenden
+     * @param email     E-Mail-Adresse des Buchenden
+     * @param topic     Thema des Termins
+     * @param startTime Startzeitpunkt
+     * @param endTime   Endzeitpunkt
+     */
     public Appointment(String name, String email, String topic, LocalDateTime startTime, LocalDateTime endTime) {
         this.name = name;
         this.email = email;
