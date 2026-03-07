@@ -11,7 +11,7 @@ Hier ist die physikalische Sicht auf unsere Infrastruktur:
 
 ```mermaid
 graph TD
-    subgraph "Host Maschine (Ihr PC)"
+    subgraph "Host Maschine (Mein PC)"
         Client(Browser)
         
         subgraph "Docker Network: app-network"
@@ -53,7 +53,7 @@ graph TD
 
 2.  **Ports (Innen vs. Außen):**
     -   **Innen:** Der Prozess im Container lauscht oft auf Standard-Ports (Java: 8080, Postgres: 5432).
-    -   **Außen (Host):** Wir mappen diese auf Ports Ihres PCs (z.B. Frontend an `3000`).
+    -   **Außen (Host):** Wir mappen diese auf Ports des PCs (z.B. Frontend an `3000`).
     -   *Merke:* Die Container untereinander nutzen IMMER die inneren Ports.
 
 ## 2. Base Images & Java-Version
