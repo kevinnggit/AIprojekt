@@ -213,12 +213,18 @@ git clone <repository-url>
 cd AIprojekt
 ```
 
-### Schritt 2: Konfiguration prüfen
+### Schritt 2: Konfiguration anlegen
 
-Die `.env`-Datei ist bereits vorhanden. Für KI-Funktionen muss der OpenAI-Schlüssel eingetragen werden:
+Lege zuerst eine lokale Konfiguration an:
+
+```bash
+cp .env.example .env
+```
+
+Für KI-Funktionen muss anschließend ein gültiger OpenAI-Schlüssel in `.env` eingetragen werden:
 
 ```ini
-OPENAI_API_KEY=sk-...
+OPENAI_API_KEY=<your-openai-api-key>
 ```
 
 Ohne diesen Schlüssel fällt der KI-Service automatisch auf den MockProvider zurück, der Platzhalterantworten liefert.

@@ -1,7 +1,11 @@
 try {
+    $adminPassword = $env:DEBUG_ADMIN_PASSWORD
+    if (-not $adminPassword) {
+        throw "Bitte DEBUG_ADMIN_PASSWORD als Umgebungsvariable setzen."
+    }
     $body = @{
         username = "admin"
-        password = "password123"
+        password = $adminPassword
         role = "ROLE_ADMIN"
     } | ConvertTo-Json
 

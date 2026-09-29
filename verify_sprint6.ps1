@@ -54,7 +54,11 @@ catch {
 # 4. Login as Admin
 Write-Output "`nTest 4: Login Admin..."
 try {
-    $loginBody = @{ username = "admin"; password = "password123" } | ConvertTo-Json
+    $adminPassword = $env:DEBUG_ADMIN_PASSWORD
+    if (-not $adminPassword) {
+        throw "Bitte DEBUG_ADMIN_PASSWORD als Umgebungsvariable setzen."
+    }
+    $loginBody = @{ username = "admin"; password = $adminPassword } | ConvertTo-Json
     $loginRes = Invoke-RestMethod -Uri "http://localhost:8081/api/auth/login" -Method Post -ContentType "application/json" -Body $loginBody
     $token = $loginRes.token
     Write-Output "SUCCESS: Got Token"

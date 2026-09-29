@@ -81,12 +81,12 @@ Dieses Skript läuft **automatisch**, wenn der Postgres-Container das *erste Mal
 
 ```sql
 -- 1. Eigene User für jeden Microservice (Security Best Practice!)
-CREATE USER java_user WITH PASSWORD 'java_password';
-CREATE USER python_user WITH PASSWORD 'python_password';
+CREATE USER <JAVA_DB_USER> WITH PASSWORD '<JAVA_DB_PASSWORD>';
+CREATE USER <PYTHON_DB_USER> WITH PASSWORD '<PYTHON_DB_PASSWORD>';
 
 -- 2. Strikte Trennung der Datenhoheit
-CREATE DATABASE java_db OWNER java_user;
-CREATE DATABASE python_db OWNER python_user;
+CREATE DATABASE <JAVA_DB_NAME> OWNER <JAVA_DB_USER>;
+CREATE DATABASE <PYTHON_DB_NAME> OWNER <PYTHON_DB_USER>;
 ```
 
 **Warum machen wir das?**

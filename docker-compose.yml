@@ -84,6 +84,12 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB} # Default maintenance DB
+      JAVA_DB_USER: ${JAVA_DB_USER}
+      JAVA_DB_PASSWORD: ${JAVA_DB_PASSWORD}
+      JAVA_DB_NAME: ${JAVA_DB_NAME}
+      PYTHON_DB_USER: ${PYTHON_DB_USER}
+      PYTHON_DB_PASSWORD: ${PYTHON_DB_PASSWORD}
+      PYTHON_DB_NAME: ${PYTHON_DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
