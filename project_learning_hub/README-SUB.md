@@ -45,10 +45,10 @@ Obwohl alle Dienste dieselbe PostgreSQL-Instanz nutzen, besitzt jeder Dienst ein
 
 ```sql
 -- docker/init.sql — wird beim ersten Start automatisch ausgeführt
-CREATE USER java_user WITH PASSWORD 'java_password';
-CREATE USER python_user WITH PASSWORD 'python_password';
-CREATE DATABASE java_db OWNER java_user;
-CREATE DATABASE python_db OWNER python_user;
+CREATE USER <JAVA_DB_USER> WITH PASSWORD '<JAVA_DB_PASSWORD>';
+CREATE USER <PYTHON_DB_USER> WITH PASSWORD '<PYTHON_DB_PASSWORD>';
+CREATE DATABASE <JAVA_DB_NAME> OWNER <JAVA_DB_USER>;
+CREATE DATABASE <PYTHON_DB_NAME> OWNER <PYTHON_DB_USER>;
 ```
 
 ### Java-Datenbankschema (`java_db`)

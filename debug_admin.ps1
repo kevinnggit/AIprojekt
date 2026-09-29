@@ -1,6 +1,12 @@
 
 # 1. Login
-$loginBody = @{ username = "admin"; password = "password123" } | ConvertTo-Json
+$adminPassword = $env:DEBUG_ADMIN_PASSWORD
+if (-not $adminPassword) {
+    Write-Error "Bitte DEBUG_ADMIN_PASSWORD als Umgebungsvariable setzen."
+    exit
+}
+
+$loginBody = @{ username = "admin"; password = $adminPassword } | ConvertTo-Json
 try {
     $loginRes = Invoke-RestMethod -Uri "http://localhost:8081/api/auth/login" -Method Post -ContentType "application/json" -Body $loginBody
     $token = $loginRes.token
